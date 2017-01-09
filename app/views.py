@@ -1,10 +1,13 @@
 from django.shortcuts import render,redirect
 from django.conf import settings
 from django.core.files.storage import FileSystemStorage
-
-
 from .models import image
 from .forms import ImageForm
+import cv2
+import numpy as np
+import pickle
+from pyspark import SparkContext, SparkFiles
+
 
 
 def home(request):
@@ -34,5 +37,9 @@ def model_form_upload(request):
     return render(request, 'model_form_upload.html', {
         'form': form
 })
+
+img_dir = './my_images/'
+rect_img_dir = './face_detected/'
+
 
 

@@ -38,8 +38,33 @@ def model_form_upload(request):
         'form': form
 })
 
-img_dir = './my_images/'
-rect_img_dir = './face_detected/'
+img_dir = './upload/'
+result = './result/'
+
+sc = SparkContext()
+classifier = "./haarcascade_frontalface_default.xml"
+sc.addFile(classifier)
+images_RDD = sc.binaryFiles(img_dir)
+
+def face_detect(rdd_element):
+    x = rdd_element[0]
+    img = rdd_element[1]
+    img_fname = x.split("/")[-1]
+    file_bytes = np.asarray(bytearray(img), dtype=np.uint8)
+    im = cv2.imdecode(file_bytes,1)
+    gray = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
+    faceCascade = cv2.CascadeClassifier(SparkFiles.get("haarcascade_frontalface_default.xml"))
+    faces = faceCascade.detectMultiScale(im)
+    print (faces)
+    for (x,y,w,h) in faces:
+        cv2.rectangle(im, (x,y), (x+w,y+h), (255,255,255), 3)
+    rect_img_path = rect_img_dir + 'rect_' + img_fname
+    cv2.imwrite(rect_img_path,im)
+    return (img_fname,len(faces))
+
+num_face_rdd = images_RDD.map(face_detect)
+result = num_face_rdd.collect()
+pickle.dump(result,open("./face_detection_result.p","wb"))
 
 
 

@@ -26,6 +26,7 @@ def upload(request):
         })
     return render(request, 'upload.html')
 
+
 def model_form_upload(request):
     if request.method == 'POST':
         form = ImageForm(request.POST, request.FILES)
@@ -45,6 +46,7 @@ sc = SparkContext()
 classifier = "./haarcascade_frontalface_default.xml"
 sc.addFile(classifier)
 images_RDD = sc.binaryFiles(img_dir)
+
 
 def face_detect(rdd_element):
     x = rdd_element[0]
